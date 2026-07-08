@@ -1,19 +1,25 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import pandas as pd
 import json
 
 app = Flask(__name__)
 
-@app.route('/')
+# methods=['GET', 'POST'] जोड़ने से हम फाइल रिसीव कर पाएंगे
+@app.route('/', methods=['GET', 'POST'])
 def home():
+    # डिफ़ॉल्ट रूप से आपकी पुरानी फ़ाइल लोड होगी
     df = pd.read_csv('my_analyzed_data.csv') 
+
+    # अगर कोई नई फ़ाइल अपलोड करता है, तो उसे पढ़ेंगे
+    if request.method == 'POST':
+        file = request.files['file']
+        if file.filename != '':
+            df = pd.read_csv(file)
     
-    # कॉलम के नाम बदल दिए गए हैं जो आपकी फ़ाइल में मौजूद हैं
+    # कैलकुलेशन और चार्ट का डेटा (कोड वही है)
     total_age = df['Age'].sum()
-    # 'best' निकालने के लिए हमने 'City' का इस्तेमाल किया है
     best_city = df.groupby('City')['Age'].sum().idxmax()
     
-    # चार्ट के लिए डेटा
     chart_data = df.groupby('City')['Age'].sum()
     labels = json.dumps(chart_data.index.tolist())
     values = json.dumps(chart_data.values.tolist())

@@ -9,6 +9,13 @@
 
 <div class="container mt-5">
     <h1>Sales Dashboard</h1>
+    <form action="/" method="POST" enctype="multipart/form-data" class="mb-4 bg-white p-3 rounded shadow-sm">
+        <label class="form-label fw-bold">अपनी CSV फ़ाइल अपलोड करें:</label>
+        <div class="input-group">
+            <input type="file" name="file" class="form-control" accept=".csv" required>
+            <button type="submit" class="btn btn-success">Upload</button>
+        </div>
+    </form>
 
     <div class="stats-container bg-light p-3 rounded mb-4">
         <h3>कुल योग (Age): {{ total }}</h3>
