@@ -42,3 +42,11 @@ th {
 tr:hover {
     background-color: #f1f1f1;
 }
+.stats-container {
+    display: flex;
+    justify-content: space-around;
+    background: #e9ecef;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
