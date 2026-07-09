@@ -10,6 +10,13 @@
 <div class="container mt-5">
     <h1 class="mb-4 text-center text-primary">Sales Dashboard</h1>
 
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>सॉरी!</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- फाइल अपलोड करने का फॉर्म -->
     <div class="bg-white p-4 rounded shadow-sm mb-4">
         <form action="/" method="POST" enctype="multipart/form-data">
             <label class="form-label fw-bold">अपनी CSV या Excel फ़ाइल अपलोड करें:</label>
@@ -20,6 +27,7 @@
         </form>
     </div>
 
+    <!-- Stats बॉक्स -->
     <div class="row text-center mb-4">
         <div class="col-md-6 mb-2">
             <div class="bg-white p-3 rounded shadow-sm border-start border-primary border-4">
@@ -35,10 +43,23 @@
         </div>
     </div>
 
+    <!-- [नया फीचर]: चार्ट बदलने का ड्रॉपडाउन -->
     <div class="bg-white p-4 rounded shadow-sm mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-secondary mb-0">डेटा विज़ुअलाइज़ेशन</h4>
+            <div class="d-flex align-items-center">
+                <label class="me-2 fw-bold text-muted small">चार्ट का प्रकार:</label>
+                <select id="chartType" class="form-select form-select-sm" style="width: 150px;">
+                    <option value="bar">Bar (बार)</option>
+                    <option value="line">Line (लाइन)</option>
+                    <option value="pie">Pie (पाई)</option>
+                </select>
+            </div>
+        </div>
         <canvas id="myChart" width="400" height="150"></canvas>
     </div>
 
+    <!-- डेटा टेबल -->
     <div class="bg-white p-4 rounded shadow-sm mb-5">
         <h4 class="mb-3 text-secondary">डेटा टेबल</h4>
         <div class="table-responsive">
@@ -49,28 +70,63 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- जावास्क्रिप्ट का जादू जो चार्ट को लाइव बदलेगा -->
 <script>
     const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
+    
+    // चार्ट का डेटाबेस
+    const chartData = {
+        labels: {{ labels | safe }},
+        datasets: [{
+            label: 'Age by City',
+            data: {{ values | safe }},
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(255, 206, 86, 0.6)'
+            ],
+            borderColor: [
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 206, 86, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    // चार्ट को पहली बार लोड करना (Default: Bar)
+    let myChart = new Chart(ctx, {
         type: 'bar',
-        data: {
-            labels: {{ labels | safe }},
-            datasets: [{
-                label: 'Age by City',
-                data: {{ values | safe }},
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
+        data: chartData,
         options: {
             responsive: true,
             scales: {
-                y: {
-                    beginAtZero: true
-                }
+                y: { beginAtZero: true }
             }
         }
+    });
+
+    // ड्रॉपडाउन बदलने पर चार्ट को अपडेट करने का फंक्शन
+    document.getElementById('chartType').addEventListener('change', function() {
+        const selectedType = this.value;
+        
+        // पुराने चार्ट को डिलीट करना ज़रूरी है वरना एरर आएगा
+        myChart.destroy();
+        
+        // नया चार्ट बनाना चुनी हुई वैल्यू के आधार पर
+        myChart = new Chart(ctx, {
+            type: selectedType,
+            data: chartData,
+            options: {
+                responsive: true,
+                // पाई चार्ट में स्केल्स की जरूरत नहीं होती, इसलिए सिर्फ बार और लाइन में दिखाएंगे
+                scales: (selectedType === 'pie') ? {} : {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
     });
 </script>
 
