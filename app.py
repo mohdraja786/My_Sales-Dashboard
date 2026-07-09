@@ -2,21 +2,24 @@ from flask import Flask, render_template, request
 import pandas as pd
 import json
 
+# यह लाइन मिसिंग थी, इसे सुनिश्चित करें
 app = Flask(__name__)
 
-# methods=['GET', 'POST'] जोड़ने से हम फाइल रिसीव कर पाएंगे
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    # डिफ़ॉल्ट रूप से आपकी पुरानी फ़ाइल लोड होगी
+    # डिफ़ॉल्ट फ़ाइल (पुरानी CSV)
     df = pd.read_csv('my_analyzed_data.csv') 
 
-    # अगर कोई नई फ़ाइल अपलोड करता है, तो उसे पढ़ेंगे
     if request.method == 'POST':
         file = request.files['file']
         if file.filename != '':
-            df = pd.read_csv(file)
+            # चेक कर रहे हैं कि फाइल Excel है या CSV
+            if file.filename.endswith('.xlsx') or file.filename.endswith('.xls'):
+                df = pd.read_excel(file)
+            elif file.filename.endswith('.csv'):
+                df = pd.read_csv(file)
     
-    # कैलकुलेशन और चार्ट का डेटा (कोड वही है)
+    # कैलकुलेशन (Age और City कॉलम के साथ)
     total_age = df['Age'].sum()
     best_city = df.groupby('City')['Age'].sum().idxmax()
     
